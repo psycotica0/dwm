@@ -690,11 +690,11 @@ drawbar(Monitor *m) {
 	}
 	dc.x = 0;
 	for(i = 0; i < LENGTH(tags); i++) {
+		if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i))
+			continue;
 		dc.w = TEXTW(tags[i]);
 		col = m->tagset[m->seltags] & 1 << i ? dc.sel : dc.norm;
 		drawtext(tags[i], col, urg & 1 << i);
-		drawsquare(m == selmon && selmon->sel && selmon->sel->tags & 1 << i,
-		           occ & 1 << i, urg & 1 << i, col);
 		dc.x += dc.w;
 	}
 	dc.w = blw = TEXTW(m->ltsymbol);
