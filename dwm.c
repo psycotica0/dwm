@@ -244,6 +244,7 @@ static char *dmenu_fetch(const char *prompt, const char *words[], size_t number_
 static void newtag(const Arg *arg);
 static void movenewtag(const Arg *arg);
 static void shunt(Monitor *m);
+static void searchtag(const Arg *arg);
 
 /* variables */
 static const char broken[] = "broken";
@@ -2169,4 +2170,38 @@ void shunt(Monitor *m)
 			client_end = i;
 		}
 	}
+}
+
+void searchtag(const Arg *arg)
+{
+	size_t number = 0;
+	char *values[LENGTH(tags)];
+	size_t i;
+	char * result;
+
+	for (i=0; i < LENGTH(tags); i++)
+	{
+		if (tags[i])
+		{
+			values[number] = tags[i];
+			number++;
+		}
+	}
+	result = dmenu_fetch("Tag: ", values, number);
+
+	/* This is not super efficient... */
+	for (i=0; i < LENGTH(tags); i++)
+	{
+		if (tags[i] == NULL)
+			continue;
+
+		if (strcmp(tags[i], result) == 0)
+		{
+			Arg subarg;
+			subarg.ui = 1 << i;
+			view(&subarg);
+			break;
+		}
+	}
+	free(result);
 }
