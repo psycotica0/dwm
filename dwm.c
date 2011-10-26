@@ -2108,6 +2108,29 @@ void movenewtag(const Arg *arg)
 	view(&subarg);
 }
 
+void move_tag(Monitor *m, size_t tag, size_t to)
+{
+	Client *c;
+	for(c = m->clients; c; c = c->next)
+	{
+		/* Find all client with tag */
+		if (c->tags & 1 << tag)
+		{
+			/* Unset tag and set to */
+			c->tags ^= 1 << tag;
+			c->tags |= 1 << to;
+		}
+	}
+	if (tags[to])
+	{
+		free(tags[to]);
+		/* Just in case to is related to tag, make sure it's NULL here */
+		tags[to] = NULL;
+	}
+	tags[to] = tags[tag];
+	tags[tag] = NULL;
+}
+
 void shunt(Monitor *m)
 {
 	unsigned int occ = 0;
@@ -2128,16 +2151,7 @@ void shunt(Monitor *m)
 			if (client_end + 1 != i)
 			{
 				/* Move 'Em! */
-				for(c = m->clients; c; c = c->next)
-				{
-					/* Find all client with tag i */
-					if (c->tags & 1 << i)
-					{
-						/* Unset i and set client_end + 1 */
-						c->tags ^= 1 << i;
-						c->tags |= 1 << (client_end + 1);
-					}
-				}
+				move_tag(m, i, client_end + 1);
 				/* Update occ, just in case */
 				occ ^= 1 << i;
 				occ |= 1 << (client_end + 1);
