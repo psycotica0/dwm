@@ -245,6 +245,7 @@ static void newtag(const Arg *arg);
 static void movenewtag(const Arg *arg);
 static void shunt(Monitor *m);
 static void searchtag(const Arg *arg);
+static void movesearchtag(const Arg *arg);
 
 /* variables */
 static const char broken[] = "broken";
@@ -2172,7 +2173,7 @@ void shunt(Monitor *m)
 	}
 }
 
-void searchtag(const Arg *arg)
+void searchtagbackend(Bool move)
 {
 	size_t number = 0;
 	char *values[LENGTH(tags)];
@@ -2199,9 +2200,22 @@ void searchtag(const Arg *arg)
 		{
 			Arg subarg;
 			subarg.ui = 1 << i;
-			view(&subarg);
+			if (move)
+				tag(&subarg);
+			else
+				view(&subarg);
 			break;
 		}
 	}
 	free(result);
+}
+
+void searchtag(const Arg *arg)
+{
+	searchtagbackend(0);
+}
+
+void movesearchtag(const Arg *arg)
+{
+	searchtagbackend(1);
 }
