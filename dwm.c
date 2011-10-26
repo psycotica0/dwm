@@ -39,6 +39,7 @@
 #ifdef XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif /* XINERAMA */
+#include "popenRWE.c"
 
 /* macros */
 #define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
@@ -238,6 +239,8 @@ static int xerror(Display *dpy, XErrorEvent *ee);
 static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void zoom(const Arg *arg);
+static void settagname(const Arg *arg);
+static char *dmenu_fetch(const char *prompt, const char *words[], size_t number_words);
 
 /* variables */
 static const char broken[] = "broken";
@@ -692,9 +695,18 @@ drawbar(Monitor *m) {
 	for(i = 0; i < LENGTH(tags); i++) {
 		if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i))
 			continue;
-		dc.w = TEXTW(tags[i]);
 		col = m->tagset[m->seltags] & 1 << i ? dc.sel : dc.norm;
-		drawtext(tags[i], col, urg & 1 << i);
+		if (tags[i])
+		{
+			dc.w = TEXTW(tags[i]);
+			drawtext(tags[i], col, urg & 1 << i);
+		}
+		else
+		{
+			static const char *number_tags[30] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"};
+			dc.w = TEXTW(number_tags[i]);
+			drawtext(number_tags[i], col, urg & 1 << i);
+		}
 		dc.x += dc.w;
 	}
 	dc.w = blw = TEXTW(m->ltsymbol);
@@ -2015,4 +2027,47 @@ main(int argc, char *argv[]) {
 	cleanup();
 	XCloseDisplay(dpy);
 	return 0;
+}
+
+void settagname(const Arg *arg)
+{
+	char *name;
+	size_t i = 0;
+	name = dmenu_fetch("Name: ", NULL, 0);
+	for (i = 0; i < LENGTH(tags); i++)
+	{
+		if (selmon->tagset[selmon->seltags] & 1 << i)
+			break;
+	}
+	if (tags[i])
+	{
+		free(tags[i]);
+	}
+
+	tags[i] = name;
+}
+
+char *dmenu_fetch(const char *prompt, const char *words[], size_t number_words)
+{
+	size_t i;
+	char buffer[150];
+	int fds[3] = {0, 0, 0};
+	const char *command[] = { "dmenu", "-fn", font, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor, "-p", prompt, NULL };
+
+	popenRWE(fds, command[0], command);
+
+	for (i=0; i < number_words; i++)
+	{
+		size_t len = strlen(words[i]);
+		write(fds[0], words[i], len);
+		write(fds[0], "\n", 1);
+	}
+	close(fds[0]);
+
+	buffer[read(fds[1], buffer, sizeof(buffer))] = '\0';
+
+	close(fds[1]);
+	close(fds[2]);
+
+	return strdup(buffer);
 }
