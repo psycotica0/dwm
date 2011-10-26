@@ -699,7 +699,14 @@ drawbar(Monitor *m) {
 	dc.x = 0;
 	for(i = 0; i < LENGTH(tags); i++) {
 		if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i))
+		{
+			if (tags[i])
+			{
+				free(tags[i]);
+				tags[i] = NULL;
+			}
 			continue;
+		}
 		col = m->tagset[m->seltags] & 1 << i ? dc.sel : dc.norm;
 		if (tags[i])
 		{
