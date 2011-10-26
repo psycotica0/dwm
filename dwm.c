@@ -2044,7 +2044,7 @@ void settagname(const Arg *arg)
 		free(tags[i]);
 	}
 
-	tags[i] = name;
+	tags[i] = *name == '\0'? NULL: name;
 }
 
 char *dmenu_fetch(const char *prompt, const char *words[], size_t number_words)
