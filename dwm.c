@@ -243,6 +243,7 @@ static void settagname(const Arg *arg);
 static char *dmenu_fetch(const char *prompt, const char *words[], size_t number_words);
 static void newtag(const Arg *arg);
 static void movenewtag(const Arg *arg);
+static void shunt(Monitor *m);
 
 /* variables */
 static const char broken[] = "broken";
@@ -386,6 +387,8 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, Bool interact) {
 
 void
 arrange(Monitor *m) {
+	if (m)
+		shunt(m);
 	if(m)
 		showhide(m->stack);
 	else for(m = mons; m; m = m->next)
@@ -2103,4 +2106,44 @@ void movenewtag(const Arg *arg)
 	subarg.ui = 1 << nextfreetag();
 	tag(&subarg);
 	view(&subarg);
+}
+
+void shunt(Monitor *m)
+{
+	unsigned int occ = 0;
+	size_t i = 0;
+	Client *c;
+	int client_end = -1;
+
+	for(c = m->clients; c; c = c->next)
+		occ |= c->tags;
+
+	/* Iterate through all tags */
+	for (i=0; i < LENGTH(tags); i++)
+	{
+		/* If this tag has things on it */
+		if ((occ & 1 << i))
+		{
+			/* Check for a gap between the last tag that had things on it and this one */
+			if (client_end + 1 != i)
+			{
+				/* Move 'Em! */
+				for(c = m->clients; c; c = c->next)
+				{
+					/* Find all client with tag i */
+					if (c->tags & 1 << i)
+					{
+						/* Unset i and set client_end + 1 */
+						c->tags ^= 1 << i;
+						c->tags |= 1 << (client_end + 1);
+					}
+				}
+				/* Update occ, just in case */
+				occ ^= 1 << i;
+				occ |= 1 << (client_end + 1);
+			}
+			/* Set that this tag has stuff on it */
+			client_end = i;
+		}
+	}
 }
