@@ -241,6 +241,8 @@ static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void zoom(const Arg *arg);
 static void settagname(const Arg *arg);
 static char *dmenu_fetch(const char *prompt, const char *words[], size_t number_words);
+static void newtag(const Arg *arg);
+static void movenewtag(const Arg *arg);
 
 /* variables */
 static const char broken[] = "broken";
@@ -2070,4 +2072,35 @@ char *dmenu_fetch(const char *prompt, const char *words[], size_t number_words)
 	close(fds[2]);
 
 	return strdup(buffer);
+}
+
+int nextfreetag()
+{
+	unsigned int occ = 0;
+	size_t i = 0;
+	Client *c;
+
+	for(c = selmon->clients; c; c = c->next)
+		occ |= c->tags;
+
+	for (i=0; i < LENGTH(tags); i++)
+		if (!(occ & 1 << i))
+			break;
+
+	return i;
+}
+
+void newtag(const Arg *arg)
+{
+	Arg subarg;
+	subarg.ui = 1 << nextfreetag();
+	view(&subarg);
+}
+
+void movenewtag(const Arg *arg)
+{
+	Arg subarg;
+	subarg.ui = 1 << nextfreetag();
+	tag(&subarg);
+	view(&subarg);
 }
