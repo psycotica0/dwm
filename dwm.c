@@ -240,6 +240,7 @@ static void movenewtag(const Arg *arg);
 static void shunt(Monitor *m);
 static void searchtag(const Arg *arg);
 static void movesearchtag(const Arg *arg);
+static const char* gettag(int i);
 
 /* variables */
 static const char broken[] = "broken";
@@ -434,12 +435,7 @@ buttonpress(XEvent *e) {
 	if(ev->window == selmon->barwin) {
 		i = x = 0;
 		do {
-			if (tags[i]) {
-				x += TEXTW(tags[i]);
-			} else {
-				static const char *number_tags[30] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"};
-				x += TEXTW(number_tags[i]);
-			}
+			x += TEXTW(gettag(i));
 		} while(ev->x >= x && ++i < LENGTH(tags));
 		if(i < LENGTH(tags)) {
 			click = ClkTagBar;
@@ -726,17 +722,8 @@ drawbar(Monitor *m) {
 			continue;
 		}
 		drw_setscheme(drw, m->tagset[m->seltags] & 1 << i ? &scheme[SchemeSel] : &scheme[SchemeNorm]);
-		if (tags[i])
-		{
-			w = TEXTW(tags[i]);
-			drw_text(drw, x, 0, w, bh, tags[i], urg & 1 << i);
-		}
-		else
-		{
-			static const char *number_tags[30] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"};
-			w = TEXTW(number_tags[i]);
-			drw_text(drw, x, 0, w, bh, number_tags[i], urg & 1 << i);
-		}
+		w = TEXTW(gettag(i));
+		drw_text(drw, x, 0, w, bh, gettag(i), urg & 1 << i);
 		drw_rect(drw, x, 0, w, bh, m == selmon && selmon->sel && selmon->sel->tags & 1 << i, occ & 1 << i, urg & 1 << i);
 		x += w;
 	}
@@ -2267,4 +2254,10 @@ void searchtag(const Arg *arg)
 void movesearchtag(const Arg *arg)
 {
 	searchtagbackend(1);
+}
+
+const char* gettag(int i)
+{
+	static const char *number_tags[30] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"};
+	return tags[i] ? tags[i] : number_tags[i];
 }
