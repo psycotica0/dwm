@@ -2224,7 +2224,7 @@ void searchtagbackend(Bool move)
 			number++;
 		}
 	}
-	result = dmenu_fetch("Tag: ", values, number);
+	result = dmenu_fetch("Tag: ", (const char**)values, number);
 
 	/* This is not super efficient... */
 	for (i=0; i < LENGTH(tags); i++)
