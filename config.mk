@@ -1,5 +1,5 @@
 # dwm version
-VERSION = 5.7.2
+VERSION = 6.1
 
 # Customize below to fit your system
 
@@ -15,15 +15,14 @@ X11LIB = /usr/X11R6/lib
 #XINERAMAFLAGS = -DXINERAMA
 
 # includes and libs
-INCS = -I. -I/usr/include -I${X11INC}
-LIBS = -L/usr/lib -lc -L${X11LIB} -lX11 ${XINERAMALIBS}
+INCS = -I${X11INC}
+LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS}
 
 # flags
-CPPFLAGS = -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS}
-CFLAGS = -g -std=c99 -pedantic -Wall -O0 ${INCS} ${CPPFLAGS}
-#CFLAGS = -std=c99 -pedantic -Wall -Os ${INCS} ${CPPFLAGS} -D _BSD_SOURCE
-LDFLAGS = -g ${LIBS}
-#LDFLAGS = -s ${LIBS}
+CPPFLAGS = -D_BSD_SOURCE -D_POSIX_C_SOURCE=2 -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS}
+#CFLAGS   = -g -std=c99 -pedantic -Wall -O0 ${INCS} ${CPPFLAGS}
+CFLAGS   = -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Os ${INCS} ${CPPFLAGS}
+LDFLAGS  = -s ${LIBS}
 
 # Solaris
 #CFLAGS = -fast ${INCS} -DVERSION=\"${VERSION}\"
