@@ -2114,7 +2114,7 @@ char *dmenu_fetch(const char *prompt, const char *words[], size_t number_words)
 	}
 	close(fds[0]);
 
-	buffer[read(fds[1], buffer, sizeof(buffer))] = '\0';
+	buffer[read(fds[1], buffer, sizeof(buffer))-1] = '\0';
 
 	close(fds[1]);
 	close(fds[2]);
